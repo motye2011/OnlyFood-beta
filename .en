@@ -1,0 +1,11 @@
+# OnlyFood - Variables de entorno
+# Copia este archivo a .env y completa con tus datos
+# cp .env.example .env
+
+# Base de datos PostgreSQL local (pgAdmin)
+# Formato: postgresql://usuario:password@host:5432/nombre_db?schema=public
+DATABASE_URL="postgresql://postgres:tu_password@localhost:5432/Onlyfood?schema=public"
+
+# Gemini API Key para Luna-Worker (opcional, fallback funciona sin ella)
+# Consigue una gratis en https://aistudio.google.com/apikey
+GEMINI_API_KEY="AIza...tu_key..."
