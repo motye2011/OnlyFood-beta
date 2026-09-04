@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OnlyFood · Panel Cocina</title>
+<style>
+  :root{
+    --cream:#faf6ee;
+    --cream-panel:#ffffff;
+    --line:#e8e1d3;
+    --ink:#1c1a16;
+    --ink-soft:#6b6558;
+    --amber-bg:#fdead0;
+    --amber-text:#95590a;
+    --red-bg:#fbdede;
+    --red-text:#a3282c;
+    --blue-bg:#dfe9fb;
+    --blue-text:#2a4f9c;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif;
+  }
+
+  ul{ list-style:none; margin:0; padding:0; }
+
+  header.site{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    padding:28px 40px 20px 40px;
+    border-bottom:1px solid var(--line);
+  }
+  header.site hgroup{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  header.site hgroup h1{
+    margin:0;
+    font-size:26px;
+    letter-spacing:6px;
+    font-weight:600;
+  }
+  header.site hgroup p{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:11px;
+    letter-spacing:2px;
+    color:var(--ink-soft);
+  }
+  p.status-line{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:13px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  p.status-line::before{
+    content:"";
+    width:8px;height:8px;border-radius:50%;
+    background:#2fae5c;
+    box-shadow:0 0 0 4px rgba(47,174,92,0.15);
+  }
+  p.status-line[data-connected="false"]::before{
+    background:#c94b4b;
+    box-shadow:0 0 0 4px rgba(201,75,75,0.15);
+  }
+
+  main{
+    padding:28px 40px 60px 40px;
+    max-width:720px;
+    margin:0 auto;
+  }
+
+  section.column{
+    background:var(--cream-panel);
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+  }
+  section.column > header{
+    padding:16px 18px;
+    border-bottom:1px solid var(--line);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  section.column > header h2{
+    margin:0;
+    font-size:16px;
+    font-weight:600;
+  }
+  section.column > header data{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:12px;
+    padding:3px 10px;
+    border-radius:999px;
+    font-weight:600;
+    background:var(--blue-bg);
+    color:var(--blue-text);
+  }
+
+  ul.col-body{
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    min-height:120px;
+  }
+
+  p.empty{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color:var(--ink-soft);
+    font-size:13px;
+    text-align:center;
+    padding:26px 10px;
+    margin:0;
+    border:1px dashed var(--line);
+    border-radius:10px;
+  }
+
+  article.card{
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:14px 16px;
+    background:var(--cream);
+  }
+  article.card[data-urgent="true"]{
+    border-color:#e3a3a3;
+    background:#fff6f6;
+  }
+
+  article.card > header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:8px;
+  }
+  article.card > header h3{
+    margin:0;
+    font-size:15px;
+    font-weight:600;
+  }
+  article.card > header p{
+    margin:0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  article.card > header data{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:12px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:999px;
+    background:#efeae0;
+    color:var(--ink-soft);
+    white-space:nowrap;
+  }
+  article.card > header data[data-level="warn"]{ background:var(--amber-bg); color:var(--amber-text); }
+  article.card > header data[data-level="late"]{ background:var(--red-bg); color:var(--red-text); }
+
+  ul.items{
+    margin:0 0 12px 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:13.5px;
+  }
+  ul.items li{
+    padding:3px 0;
+    color:var(--ink);
+  }
+  ul.items li data{
+    color:var(--ink-soft);
+    margin-right:6px;
+    font-weight:600;
+  }
+  ul.items li small{
+    display:block;
+    font-size:12px;
+    color:var(--ink-soft);
+    font-style:italic;
+  }
+
+  @media (max-width: 700px){
+    header.site{ padding:20px; }
+    main{ padding:20px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="site">
+  <hgroup>
+    <h1>ONLYFOOD</h1>
+    <p>PANEL COCINA</p>
+  </hgroup>
+  <p class="status-line" id="connStatus" data-connected="true">
+    <output id="connText">Conectado · actualizando cada 8s</output>
+  </p>
+</header>
+
+<main>
+  <section class="column">
+    <header>
+      <h2>En preparación</h2>
+      <data id="count-preparacion" value="0">0</data>
+    </header>
+    <ul class="col-body" id="col-preparacion"></ul>
+  </section>
+</main>
+
+<script>
+/* =========================================================================
+   OnlyFood · Panel Cocina (KDS) — vista única "En preparación"
+   -------------------------------------------------------------------------
+   Solo se muestran los pedidos con estado "en_preparacion". Al marcar un
+   pedido como listo, desaparece de esta vista (no hay columna "Pendiente"
+   ni "Preparado" aquí — eso se maneja en otras pantallas del panel).
+
+   La única parte que depende de TU backend está marcada con
+   "CONECTAR AQUÍ". El resto (render, timers) ya funciona solo.
+   ========================================================================= */
+
+// ---------------------------------------------------------------------
+// CONECTAR AQUÍ (1/2): traer los pedidos en preparación desde tu API
+// Reemplaza este mock por un fetch real a tu backend, por ejemplo:
+//
+//   async function obtenerPedidosEnPreparacion() {
+//     const res = await fetch("/api/pedidos?estado=en_preparacion");
+//     if (!res.ok) throw new Error("Error al cargar pedidos");
+//     return await res.json(); // debe devolver un array como el de abajo
+//   }
+// ---------------------------------------------------------------------
+let pedidosMock = [
+  {
+    id: "PED-1043",
+    mesa: "Mesa 2",
+    creado: Date.now() - 1000 * 60 * 9,
+    items: [
+      { cantidad: 2, nombre: "Jugo de mora" },
+      { cantidad: 1, nombre: "Chamorro", nota: "término medio" },
+    ],
+  },
+  {
+    id: "PED-1045",
+    mesa: "Mesa 5",
+    creado: Date.now() - 1000 * 60 * 2,
+    items: [
+      { cantidad: 1, nombre: "Hamburguesa doble", nota: "sin cebolla" },
+      { cantidad: 1, nombre: "Limonada" },
+    ],
+  },
+];
+
+async function obtenerPedidosEnPreparacion() {
+  // MOCK — bórralo cuando conectes tu API real de arriba.
+  return pedidosMock;
+}
+
+// Esta pantalla es de solo lectura: solo muestra lo que está en
+// preparación. Marcar un pedido como listo se hace en otra pantalla del
+// panel; cuando eso pase, el pedido dejará de venir en esta lista y
+// desaparecerá aquí en el próximo refresco automático.
+
+// Si tu backend soporta WebSockets/SSE, cambia el setInterval de abajo
+// por una suscripción en tiempo real para que los pedidos nuevos
+// aparezcan al instante y no haya que esperar el próximo polling.
+
+let pedidosCache = [];
+
+function minutosDesde(timestamp) {
+  return Math.floor((Date.now() - timestamp) / 60000);
+}
+
+function nivelTimer(minutos) {
+  if (minutos >= 15) return "late";
+  if (minutos >= 8) return "warn";
+  return "normal";
+}
+
+function escapeHtml(str){
+  const p = document.createElement("p");
+  p.textContent = str;
+  return p.innerHTML;
+}
+
+function renderItems(items) {
+  return items.map(it => `
+    <li>
+      <data value="${it.cantidad}">${it.cantidad}×</data>${escapeHtml(it.nombre)}
+      ${it.nota ? `<small>↳ ${escapeHtml(it.nota)}</small>` : ""}
+    </li>
+  `).join("");
+}
+
+function renderCard(pedido) {
+  const mins = minutosDesde(pedido.creado);
+  const nivel = nivelTimer(mins);
+  const urgente = mins >= 15 ? "true" : "false";
+
+  return `
+    <li>
+      <article class="card" data-urgent="${urgente}" data-card-id="${pedido.id}">
+        <header>
+          <hgroup>
+            <h3>${escapeHtml(pedido.id)}</h3>
+            <p>${escapeHtml(pedido.mesa)}</p>
+          </hgroup>
+          <data value="${mins}" data-level="${nivel}">${mins} min</data>
+        </header>
+        <ul class="items">${renderItems(pedido.items)}</ul>
+      </article>
+    </li>
+  `;
+}
+
+function renderColumna() {
+  const contenedor = document.getElementById("col-preparacion");
+  const contador = document.getElementById("count-preparacion");
+  const pedidosOrdenados = [...pedidosCache].sort((a, b) => a.creado - b.creado);
+
+  contador.setAttribute("value", pedidosOrdenados.length);
+  contador.textContent = pedidosOrdenados.length;
+
+  contenedor.innerHTML = pedidosOrdenados.length
+    ? pedidosOrdenados.map(renderCard).join("")
+    : `<li><p class="empty">No hay pedidos en preparación</p></li>`;
+}
+
+async function cargarPedidos() {
+  try {
+    pedidosCache = await obtenerPedidosEnPreparacion();
+    renderColumna();
+    setConexion(true);
+  } catch (err) {
+    console.error(err);
+    setConexion(false);
+  }
+}
+
+function setConexion(ok) {
+  const estado = document.getElementById("connStatus");
+  const texto = document.getElementById("connText");
+  estado.setAttribute("data-connected", ok ? "true" : "false");
+  texto.textContent = ok
+    ? "Conectado · actualizando cada 8s"
+    : "Sin conexión con el servidor";
+}
+
+// Carga inicial + polling cada 8s + refresco de timers cada 30s
+cargarPedidos();
+setInterval(cargarPedidos, 8000);
+setInterval(renderColumna, 30000);
+</script>
+
+</body>
+</html>
