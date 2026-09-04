@@ -189,6 +189,16 @@
     font-style:italic;
   }
 
+  article.card p.notas{
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size:12px;
+    background:#fef3c7;
+    color:#92400e;
+    padding:6px 9px;
+    border-radius:8px;
+    margin:0 0 12px 0;
+  }
+
   @media (max-width: 700px){
     header.site{ padding:20px; }
     main{ padding:20px; }
@@ -221,48 +231,23 @@
 /* =========================================================================
    OnlyFood · Panel Cocina (KDS) — vista única "En preparación"
    -------------------------------------------------------------------------
-   Solo se muestran los pedidos con estado "en_preparacion". Al marcar un
-   pedido como listo, desaparece de esta vista (no hay columna "Pendiente"
-   ni "Preparado" aquí — eso se maneja en otras pantallas del panel).
+   Solo se muestran los pedidos con estado "en_preparacion". Cuando otra
+   pantalla del panel marca un pedido como "listo" (o siguiente estado),
+   deja de venir en esta lista y desaparece aquí en el próximo refresco
+   automático (cada 8s).
 
-   La única parte que depende de TU backend está marcada con
-   "CONECTAR AQUÍ". El resto (render, timers) ya funciona solo.
+   Consume: GET /api/orders/kitchen
+   (ruta creada en src/app/api/orders/kitchen/route.ts, sobre prisma.order)
    ========================================================================= */
 
 // ---------------------------------------------------------------------
-// CONECTAR AQUÍ (1/2): traer los pedidos en preparación desde tu API
-// Reemplaza este mock por un fetch real a tu backend, por ejemplo:
-//
-//   async function obtenerPedidosEnPreparacion() {
-//     const res = await fetch("/api/pedidos?estado=en_preparacion");
-//     if (!res.ok) throw new Error("Error al cargar pedidos");
-//     return await res.json(); // debe devolver un array como el de abajo
-//   }
+// Trae los pedidos en preparación desde tu API real.
+// Endpoint creado en: src/app/api/orders/kitchen/route.ts
 // ---------------------------------------------------------------------
-let pedidosMock = [
-  {
-    id: "PED-1043",
-    mesa: "Mesa 2",
-    creado: Date.now() - 1000 * 60 * 9,
-    items: [
-      { cantidad: 2, nombre: "Jugo de mora" },
-      { cantidad: 1, nombre: "Chamorro", nota: "término medio" },
-    ],
-  },
-  {
-    id: "PED-1045",
-    mesa: "Mesa 5",
-    creado: Date.now() - 1000 * 60 * 2,
-    items: [
-      { cantidad: 1, nombre: "Hamburguesa doble", nota: "sin cebolla" },
-      { cantidad: 1, nombre: "Limonada" },
-    ],
-  },
-];
-
 async function obtenerPedidosEnPreparacion() {
-  // MOCK — bórralo cuando conectes tu API real de arriba.
-  return pedidosMock;
+  const res = await fetch("/api/orders/kitchen", { cache: "no-store" });
+  if (!res.ok) throw new Error("Error al cargar pedidos");
+  return await res.json();
 }
 
 // Esta pantalla es de solo lectura: solo muestra lo que está en
@@ -276,7 +261,8 @@ async function obtenerPedidosEnPreparacion() {
 
 let pedidosCache = [];
 
-function minutosDesde(timestamp) {
+function minutosDesde(fecha) {
+  const timestamp = new Date(fecha).getTime();
   return Math.floor((Date.now() - timestamp) / 60000);
 }
 
@@ -317,6 +303,7 @@ function renderCard(pedido) {
           <data value="${mins}" data-level="${nivel}">${mins} min</data>
         </header>
         <ul class="items">${renderItems(pedido.items)}</ul>
+        ${pedido.notas ? `<p class="notas">Nota: ${escapeHtml(pedido.notas)}</p>` : ""}
       </article>
     </li>
   `;
